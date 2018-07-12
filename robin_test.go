@@ -71,3 +71,11 @@ func BenchmarkRR(b *testing.B) {
 		<-rr()
 	}
 }
+
+func BenchmarkRRChan(b *testing.B) {
+	rr := NewRoundRobinChan(10)
+
+	for i := 0; i < b.N; i++ {
+		<-rr()
+	}
+}

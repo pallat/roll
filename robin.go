@@ -6,15 +6,29 @@ import (
 
 func NewRoundRobin(n int) func() <-chan int {
 	cur := 0
+	mux := sync.Mutex{}
 	ch := make(chan int, 1)
 	seq := makeSeq(n)
-	mux := sync.Mutex{}
 
 	return func() <-chan int {
 		mux.Lock()
 		ch <- cur
 		cur = seq[cur]
 		mux.Unlock()
+		return ch
+	}
+}
+
+func NewRoundRobinChan(n int) func() <-chan int {
+	cur := make(chan int, 1)
+	ch := make(chan int, 1)
+	seq := makeSeq(n)
+	cur <- 0
+
+	return func() <-chan int {
+		i := <-cur
+		ch <- i
+		cur <- seq[i]
 		return ch
 	}
 }
