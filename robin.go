@@ -4,6 +4,20 @@ import (
 	"sync"
 )
 
+func NewRoundRobin2(n int) func() int {
+	cur := 0
+	mux := sync.Mutex{}
+	seq := makeSeq(n)
+
+	return func() int {
+		mux.Lock()
+		i := cur
+		cur = seq[cur]
+		mux.Unlock()
+		return i
+	}
+}
+
 func NewRoundRobin(n int) func() <-chan int {
 	cur := 0
 	mux := sync.Mutex{}

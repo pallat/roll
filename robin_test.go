@@ -64,11 +64,53 @@ func TestRoundRobinHitByConcurrency(t *testing.T) {
 	}
 }
 
+func TestRoundRobin2HitByConcurrency(t *testing.T) {
+	rr := NewRoundRobin2(10)
+
+	var a, b, c int
+	wg := sync.WaitGroup{}
+	wg.Add(30)
+
+	go func() {
+		for i := 0; i < 10; i++ {
+			a += rr()
+			wg.Done()
+		}
+	}()
+	go func() {
+		for i := 0; i < 10; i++ {
+			b += rr()
+			wg.Done()
+		}
+	}()
+	go func() {
+		for i := 0; i < 10; i++ {
+			c += rr()
+			wg.Done()
+		}
+	}()
+
+	wg.Wait()
+
+	sum := a + b + c
+
+	if 135 != sum {
+		t.Errorf("lost some\n(a=%d)\n (b=%d)\n (c=%d)\n", a, b, c)
+	}
+}
 func BenchmarkRR(b *testing.B) {
 	rr := NewRoundRobin(10)
 
 	for i := 0; i < b.N; i++ {
 		<-rr()
+	}
+}
+
+func BenchmarkRR2(b *testing.B) {
+	rr := NewRoundRobin2(10)
+
+	for i := 0; i < b.N; i++ {
+		rr()
 	}
 }
 
